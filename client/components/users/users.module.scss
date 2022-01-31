@@ -1,0 +1,44 @@
+.body {
+    font-family: "Helvetica Neue", "Helvetica", "Arial", "sans-serif";
+    font-size: 14px;
+}
+
+@media (max-width: 760px) {
+    .container {
+        grid-template-columns: none;
+    }
+}
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-gap: 1rem;
+    grid-column-gap: 4rem;
+}
+
+.title {
+    text-align: center;
+}
+
+.loadMoreContainer {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+}
+
+.loadMore {
+    padding: 0.625rem 1.5rem;
+    font-weight: 600;
+    border-radius: 0.25rem;
+    background: linear-gradient(to right, #0062bc, #0085e7);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    text-align: center;
+}
+
+.loadMore:hover {
+    background: #1792e5;
+    color: #fff;
+}
+

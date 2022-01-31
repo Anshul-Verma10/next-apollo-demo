@@ -1,20 +1,62 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const cors = require('cors')
-const { graphqlExpress, graphiqlExpress } = require('apollo-server-express')
-const myGraphQLSchema = require('./schema')
+const { ApolloServer, gql } = require('apollo-server');
+const casual = require('casual');
 
-const app = express();
-
-// to access graphql API from the client side
-app.use(cors())
-// bodyParser is needed just for POST.
-app.use('/graphql', bodyParser.json(), graphqlExpress({ schema: myGraphQLSchema }));
-// for the graphiql interface
-app.get('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
-
-const port = process.env.PORT || 5000
-app.listen(port, (err) => {
-  if (err) throw err
-  console.log(`Graphql Server started on: http://localhost:${port}`)
+const typeDefs = gql`
+type user {
+  id: ID,
+  fullName: String,
+  address: String,
+  email: String,
+  phone: String
+}
+type userConnection {
+  nodes: [user]
+}
+type Query {
+  users(limit: Int!, offset: Int): userConnection
+}
+`
+casual.define('user', function (id) {
+  return {
+    id,
+    fullName: casual.full_name,
+    address: casual.address,
+    email: casual.email,
+    phone: casual.phone,
+  }
 })
+
+const usersRecords = function (userCount) {
+  const result = [];
+
+  for (var i = 0; i < userCount; ++i) {
+    result.push(casual.user(i));
+  }
+  return result;
+};
+
+
+const resolvers = {
+  Query: {
+    users: (query, {limit = 20, offset = 0}) => {
+      const users = usersRecords(offset + limit);
+      return {
+        nodes: users.slice(offset, offset + limit).map((user => ({...user})))
+      }
+    },
+  },
+}
+
+
+// ApolloServer
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  playground: true,
+  introspection: true,
+});
+
+// Server
+server.listen({ port: process.env.PORT || 4000 }).then(({ url }) => {
+  console.log(`Server started on ${url}`);
+});
